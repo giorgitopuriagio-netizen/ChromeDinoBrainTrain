@@ -1,0 +1,778 @@
+fileFormatVersion: 2
+guid: e1f775877d12e894daa5baec3836c982
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1553732481050088300
+    second: offline-sprite-2x_0
+  - first:
+      213: -3437628677490832347
+    second: offline-sprite-2x_1
+  - first:
+      213: 4475136869969044342
+    second: offline-sprite-2x_2
+  - first:
+      213: 6919411647904202917
+    second: offline-sprite-2x_3
+  - first:
+      213: 188852662842740190
+    second: offline-sprite-2x_4
+  - first:
+      213: -3468015708031207118
+    second: offline-sprite-2x_5
+  - first:
+      213: 8712911623039434737
+    second: offline-sprite-2x_6
+  - first:
+      213: -7524361873267390510
+    second: offline-sprite-2x_7
+  - first:
+      213: 157843615065298876
+    second: offline-sprite-2x_8
+  - first:
+      213: 7574892659860716922
+    second: offline-sprite-2x_9
+  - first:
+      213: 3308942004265599320
+    second: offline-sprite-2x_10
+  - first:
+      213: 1380399089327562583
+    second: offline-sprite-2x_11
+  - first:
+      213: -7482655682461870262
+    second: offline-sprite-2x_12
+  - first:
+      213: 663010572895257527
+    second: offline-sprite-2x_13
+  - first:
+      213: 4727748457147550125
+    second: offline-sprite-2x_14
+  - first:
+      213: 5445059548457657571
+    second: offline-sprite-2x_15
+  - first:
+      213: 5985046591754175729
+    second: offline-sprite-2x_16
+  - first:
+      213: 8500857536968940824
+    second: offline-sprite-2x_17
+  - first:
+      213: 5280485607667075837
+    second: offline-sprite-2x_18
+  - first:
+      213: 4309854979751393881
+    second: offline-sprite-2x_19
+  - first:
+      213: -1527117051999937625
+    second: offline-sprite-2x_20
+  - first:
+      213: -4545815932705250249
+    second: offline-sprite-2x_21
+  - first:
+      213: -129959099870179446
+    second: offline-sprite-2x_22
+  - first:
+      213: -8987935190656067136
+    second: offline-sprite-2x_23
+  - first:
+      213: -960039633070532958
+    second: offline-sprite-2x_24
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 1
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: offline-sprite-2x_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 63
+        width: 73
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c631af0a577ff8510800000000000000
+      internalID: 1553732481050088300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_1
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 34
+        width: 90
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52c86706ee61b40d0800000000000000
+      internalID: -3437628677490832347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_2
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 100
+        width: 94
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67322cfd541ea1e30800000000000000
+      internalID: 4475136869969044342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_3
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 48
+        width: 93
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a0c700bb30b60060800000000000000
+      internalID: 6919411647904202917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_4
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 68
+        width: 93
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eddc0ab0f70fe9200800000000000000
+      internalID: 188852662842740190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_5
+      rect:
+        serializedVersion: 2
+        x: 446
+        y: 57
+        width: 34
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 239335f76122fdfc0800000000000000
+      internalID: -3468015708031207118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_6
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 57
+        width: 34
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ff33aa45fa7ae870800000000000000
+      internalID: 8712911623039434737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_7
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 57
+        width: 34
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d78766fdb8149790800000000000000
+      internalID: -7524361873267390510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_8
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 57
+        width: 33
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb7d70e7ee5c03200800000000000000
+      internalID: 157843615065298876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_9
+      rect:
+        serializedVersion: 2
+        x: 581
+        y: 57
+        width: 35
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7d36ba9dbc6f1960800000000000000
+      internalID: 7574892659860716922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_10
+      rect:
+        serializedVersion: 2
+        x: 616
+        y: 57
+        width: 34
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 851ce9aa839bbed20800000000000000
+      internalID: 3308942004265599320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_11
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 28
+        width: 51
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75f54a778a9282310800000000000000
+      internalID: 1380399089327562583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_12
+      rect:
+        serializedVersion: 2
+        x: 802
+        y: 28
+        width: 150
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a475d463d44482890800000000000000
+      internalID: -7482655682461870262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_13
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 28
+        width: 48
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b300cf6a9c733900800000000000000
+      internalID: 663010572895257527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_14
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 28
+        width: 52
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da94eaf4c265c9140800000000000000
+      internalID: 4727748457147550125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_15
+      rect:
+        serializedVersion: 2
+        x: 953
+        y: 79
+        width: 382
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e4eaa66fccb09b40800000000000000
+      internalID: 5445059548457657571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2402
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f48ba14a282f0350800000000000000
+      internalID: 5985046591754175729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_17
+      rect:
+        serializedVersion: 2
+        x: 1337
+        y: 34
+        width: 89
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81d5c31f3ec19f570800000000000000
+      internalID: 8500857536968940824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_18
+      rect:
+        serializedVersion: 2
+        x: 1426
+        y: 34
+        width: 88
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dfa0f86dead084940800000000000000
+      internalID: 5280485607667075837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_19
+      rect:
+        serializedVersion: 2
+        x: 1514
+        y: 34
+        width: 88
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95ab78df44eafcb30800000000000000
+      internalID: 4309854979751393881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_20
+      rect:
+        serializedVersion: 2
+        x: 1602
+        y: 34
+        width: 88
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ab1a19d1279ecae0800000000000000
+      internalID: -1527117051999937625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_21
+      rect:
+        serializedVersion: 2
+        x: 1690
+        y: 34
+        width: 88
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 734eac47e740ae0c0800000000000000
+      internalID: -4545815932705250249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_22
+      rect:
+        serializedVersion: 2
+        x: 1781
+        y: 38
+        width: 80
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8f88e023ea423ef0800000000000000
+      internalID: -129959099870179446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_23
+      rect:
+        serializedVersion: 2
+        x: 1865
+        y: 34
+        width: 118
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c956b07090744380800000000000000
+      internalID: -8987935190656067136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: offline-sprite-2x_24
+      rect:
+        serializedVersion: 2
+        x: 1984
+        y: 34
+        width: 118
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a6d88c4a014da2f0800000000000000
+      internalID: -960039633070532958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      offline-sprite-2x_0: 1553732481050088300
+      offline-sprite-2x_1: -3437628677490832347
+      offline-sprite-2x_10: 3308942004265599320
+      offline-sprite-2x_11: 1380399089327562583
+      offline-sprite-2x_12: -7482655682461870262
+      offline-sprite-2x_13: 663010572895257527
+      offline-sprite-2x_14: 4727748457147550125
+      offline-sprite-2x_15: 5445059548457657571
+      offline-sprite-2x_16: 5985046591754175729
+      offline-sprite-2x_17: 8500857536968940824
+      offline-sprite-2x_18: 5280485607667075837
+      offline-sprite-2x_19: 4309854979751393881
+      offline-sprite-2x_2: 4475136869969044342
+      offline-sprite-2x_20: -1527117051999937625
+      offline-sprite-2x_21: -4545815932705250249
+      offline-sprite-2x_22: -129959099870179446
+      offline-sprite-2x_23: -8987935190656067136
+      offline-sprite-2x_24: -960039633070532958
+      offline-sprite-2x_3: 6919411647904202917
+      offline-sprite-2x_4: 188852662842740190
+      offline-sprite-2x_5: -3468015708031207118
+      offline-sprite-2x_6: 8712911623039434737
+      offline-sprite-2x_7: -7524361873267390510
+      offline-sprite-2x_8: 157843615065298876
+      offline-sprite-2x_9: 7574892659860716922
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
