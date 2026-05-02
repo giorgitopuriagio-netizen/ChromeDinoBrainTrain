@@ -96,7 +96,7 @@ public class GeneticAlgorithm : MonoBehaviour
             }
             while (chromosome1.Equals(chromosome2));
 
-            int point = Random.Range(1, chromosome1[0].Length);
+            int point = Random.Range(1, chromosome1.Length);
             
             for (int j = 0; j < point; j++)
                 newGeneration[i][j] = chromosome1[j];
@@ -115,7 +115,7 @@ public class GeneticAlgorithm : MonoBehaviour
                 double[] newGene = new double[newGeneration[i][mutable].Length];
 
                 for(int j = 0; j < newGeneration[i][mutable].Length; j++)
-                    newGene[j] = Random.Range(0.0f, 1.0f);
+                    newGene[j] += Random.Range(-0.2f, 0.2f);
 
                 newGeneration[i][mutable] = newGene;
             }

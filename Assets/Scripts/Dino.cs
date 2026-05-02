@@ -78,7 +78,7 @@ public class Dino : MonoBehaviour
         {
             double[] inputs = new double[3];
 
-            inputs[0] = enemy.transform.position.x;
+            inputs[0] = enemy.transform.position.x - transform.position.x;
             inputs[1] = enemy.GetComponent<RectTransform>().sizeDelta.x;
             inputs[2] = enemy.GetComponent<RectTransform>().sizeDelta.y;
 
@@ -103,7 +103,7 @@ public class Dino : MonoBehaviour
 
     void Jump()
     {
-        dinoBody.velocity = new Vector2(0, 7);
+        dinoBody.linearVelocity = new Vector2(0, 7);
     }
 
     void OnTriggerEnter2D(Collider2D enemy)
