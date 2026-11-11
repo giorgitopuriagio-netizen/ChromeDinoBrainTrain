@@ -1,0 +1,6 @@
+{
+  "name": "ChromeDino.EditModeTests",
+  "references": ["ChromeDino.Core", "ChromeDino.Runtime"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

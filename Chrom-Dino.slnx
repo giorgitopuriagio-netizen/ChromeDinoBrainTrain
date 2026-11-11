@@ -1,3 +1,7 @@
 ﻿<Solution>
-  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="ChromeDino.Core.csproj" />
+  <Project Path="ChromeDino.Runtime.csproj" />
+  <Project Path="ChromeDino.PlayModeTests.csproj" />
+  <Project Path="ChromeDino.EditModeTests.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>

@@ -1,0 +1,5 @@
+{
+  "name": "ChromeDino.Runtime",
+  "rootNamespace": "ChromeDino",
+  "references": ["ChromeDino.Core", "UnityEngine.UI"]
+}

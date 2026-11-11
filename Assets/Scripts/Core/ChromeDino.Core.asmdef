@@ -1,0 +1,5 @@
+{
+  "name": "ChromeDino.Core",
+  "rootNamespace": "ChromeDino.Core",
+  "noEngineReferences": true
+}
