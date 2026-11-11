@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using TMPro;
 using ChromeDino.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,9 +12,9 @@ namespace ChromeDino.Presentation
     public sealed class AITestScreen : MonoBehaviour
     {
         private BoardView board;
-        private Dropdown generations;
+        private TMP_Dropdown generations;
         private Button watchButton, versusButton, courseButton, jumpButton, duckButton, stopButton;
-        private Text courseLabel, stats, message;
+        private TMP_Text courseLabel, stats, message;
         private IReadOnlyList<GenerationChampion> choices = Array.Empty<GenerationChampion>();
         private bool recordedCourse;
         private bool pointerJump, pointerDuck;
@@ -24,23 +25,24 @@ namespace ChromeDino.Presentation
         private void Start()
         {
             var ui = new UIFactory();
-            ui.Header("AI evaluation");
+            ui.Header("AI evaluation / Human vs bot");
             board = BoardView.Create(ui);
             board.Pressed = () => { pointerJump = CanControlHuman(); QueueJump(); };
             board.Released = () => pointerJump = false;
-            ui.Label(ui.Root, "Generation brain", 60, 430, 540, 32, 21, UIFactory.Muted);
-            generations = ui.Dropdown(ui.Root, 60, 475, 540, SelectGeneration);
-            watchButton = ui.Button(ui.Root, "Watch bot", 650, 430, 270, 65, () => BeginRound(EvaluationMode.WatchBot));
-            versusButton = ui.Button(ui.Root, "Human vs bot", 940, 430, 270, 65, () => BeginRound(EvaluationMode.HumanVsBot));
-            courseButton = ui.Button(ui.Root, "Course: new", 650, 525, 560, 54, () =>
+            ui.Card(40, 452, 576, 368);
+            ui.Label(ui.Root, "GENERATION BRAIN", 64, 472, 528, 28, 15, UIFactory.Muted);
+            generations = ui.Dropdown(ui.Root, 64, 512, 528, SelectGeneration);
+            watchButton = ui.Button(ui.Root, "Watch bot", 672, 452, 272, 64, () => BeginRound(EvaluationMode.WatchBot));
+            versusButton = ui.Button(ui.Root, "Human vs bot", 960, 452, 280, 64, () => BeginRound(EvaluationMode.HumanVsBot));
+            courseButton = ui.Button(ui.Root, "Course: new", 672, 540, 568, 54, () =>
             {
                 if (CurrentRound != null && CurrentRound.IsActive) return;
                 recordedCourse = !recordedCourse;
                 courseLabel.text = recordedCourse ? "Course: selected generation" : "Course: new";
             }, false, 21);
-            courseLabel = courseButton.GetComponentInChildren<Text>();
+            courseLabel = courseButton.GetComponentInChildren<TMP_Text>();
             HoldInput jumpHold = null;
-            jumpButton = ui.Button(ui.Root, "Jump / Space", 650, 610, 175, 56, () =>
+            jumpButton = ui.Button(ui.Root, "Jump / Space", 672, 622, 176, 56, () =>
             {
                 if (jumpHold == null || jumpHold.LastPointerFrame != Time.frameCount) QueueJump();
             }, false, 19);
@@ -50,14 +52,14 @@ namespace ChromeDino.Presentation
                 pointerJump = held && CanControlHuman();
                 if (held) QueueJump();
             };
-            duckButton = ui.Button(ui.Root, "Duck / Down", 843, 610, 175, 56, () => { }, false, 19);
+            duckButton = ui.Button(ui.Root, "Duck / Down", 868, 622, 176, 56, () => { }, false, 19);
             duckButton.gameObject.AddComponent<HoldInput>().Changed = held => pointerDuck = held && CanControlHuman();
-            stopButton = ui.Button(ui.Root, "Stop round", 1035, 610, 175, 56, StopRound, false, 19);
-            stats = ui.Label(ui.Root, "", 60, 565, 540, 90, 27);
-            message = ui.Label(ui.Root, "", 60, 690, 540, 140, 21, UIFactory.Muted);
-            ui.Button(ui.Root, "Main menu", 650, 815, 560, 48, AppServices.MainMenu, false, 21);
-            ui.Label(ui.Root, "Gray: bot. Blue: human. Hold Space / Up to jump higher; Down to duck or drop faster.",
-                60, 855, 1150, 35, 18, UIFactory.Muted);
+            stopButton = ui.Button(ui.Root, "Stop round", 1064, 622, 176, 56, StopRound, false, 19);
+            stats = ui.Label(ui.Root, "", 64, 598, 528, 96, 26, UIFactory.Ink, TextAlignmentOptions.TopLeft, true);
+            message = ui.Label(ui.Root, "", 64, 704, 528, 100, 18, UIFactory.Muted);
+            ui.Button(ui.Root, "Main menu", 672, 766, 568, 54, AppServices.MainMenu, false, 21);
+            ui.Label(ui.Root, "Hold jump to go higher. Hold duck to crouch\nor descend faster while airborne.", 674, 702, 566, 52, 18, UIFactory.Muted);
+            ui.Footer("GRAY  Bot     BLUE  Human     SPACE / UP  Jump     DOWN  Duck     ESC  Stop round");
             LoadArchive();
             RefreshControls();
         }
@@ -69,10 +71,10 @@ namespace ChromeDino.Presentation
                 choices = AppServices.Repository.ListChampions(out int unreadable);
                 var runIds = choices.Select(champion => champion.runId).Distinct().ToList();
                 generations.ClearOptions();
-                generations.AddOptions(choices.Count == 0 ? new List<string> { "No saved brains yet" }
+                generations.AddOptions(choices.Count == 0 ? new List<string> { "No champions saved yet" }
                     : choices.Select(champion => "Generation " + champion.generation +
                         (runIds.Count > 1 ? " (run " + (runIds.IndexOf(champion.runId) + 1) + ")" : "") +
-                        "  ·  " + champion.score + " points  ·  " + (champion.generationCompleted
+                        "  ·  " + champion.score + " pts  ·  " + (champion.generationCompleted
                             ? (champion.survivalTicks * GameRules.Step).ToString("F1", CultureInfo.InvariantCulture) + " s"
                             : "last survivor")).ToList());
                 generations.SetValueWithoutNotify(0);
@@ -98,12 +100,12 @@ namespace ChromeDino.Presentation
             board.SetReady(false);
             board.SetGameOver(false);
             stats.text = selected == null ? "No saved brains" :
-                (selected.generationCompleted ? "Generation winner: " : "Last survivor: generation ") + selected.generation;
+                (selected.generationCompleted ? "Champion / Generation " : "Last survivor: generation ") + selected.generation;
             message.text = selected == null
-                ? "Train runners from the main menu first. A brain is saved when one runner remains and when its generation ends."
-                : "Click Watch bot or Human vs bot to start the selected mode." +
-                    (!selected.generationCompleted ? "\nThis is a living survivor; its training generation is still in progress." : "") +
-                    (selected.tiedSurvivors > 1 ? "\nSeveral runners crashed on the final tick; the recorded winner was selected by the tie rule." : "");
+                ? "Start New training from the main menu. A champion is saved when one runner remains or the generation ends."
+                : "Choose Watch bot or Human vs bot to begin." +
+                    (!selected.generationCompleted ? "\nThis survivor is from an unfinished generation." : "") +
+                    (selected.tiedSurvivors > 1 ? "\nA final-tick tie was resolved by the training tie rule." : "");
             RefreshControls();
         }
 
@@ -120,7 +122,7 @@ namespace ChromeDino.Presentation
                 board.SetReady(replacement.State == EvaluationState.WaitingForHuman);
                 board.SetGameOver(false);
                 message.text = replacement.HasHuman ? "Press Space or tap the field to start together with the bot."
-                    : "The bot is playing. Click a mode button to restart or switch modes.";
+                    : "The bot is running. Choose either mode to start a fresh round.";
                 RefreshControls();
             }
             catch (Exception error) { message.text = "Could not start the round: " + error.Message; Debug.LogException(error); }
@@ -147,8 +149,7 @@ namespace ChromeDino.Presentation
 
         private static void SetModeColor(Button button, bool selectedMode)
         {
-            button.GetComponent<Image>().color = selectedMode ? UIFactory.Green : UIFactory.Cream;
-            button.GetComponentInChildren<Text>().color = selectedMode ? Color.white : UIFactory.Ink;
+            UIFactory.SetSelected(button, selectedMode);
         }
 
         private void ClearInput() { pointerJump = pointerDuck = false; accumulator = 0; }
@@ -162,7 +163,7 @@ namespace ChromeDino.Presentation
             {
                 accumulator = 0;
                 board.SetReady(false);
-                message.text = "Hold jump for a higher jump. Hold Down to duck or descend faster.";
+                message.text = "You and the bot share this course.\nKeep running to beat the champion.";
             }
         }
 

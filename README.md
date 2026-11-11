@@ -2,9 +2,19 @@
 
 [Русская версия](README_RU.md)
 
-A Unity **6000.3.8f1** endless runner with a neural network and a genetic algorithm. Train a population of Dino agents, evaluate a saved generation, and compete against its champion on the same course.
+**Train a neural network. Watch it run. Race its champion.**
 
-The menu and scene-selection workflow match [FlappyBirdBrainTrain](https://github.com/Foxter931/FlappyBirdBrainTrain): **New training**, **Continue training**, and **AI evaluation / Human vs bot**. Evaluation has one combined generation-brain list and mode buttons that start or restart a round immediately. The runner retains its own jump, duck, obstacle, and scoring rules.
+A Chrome Dino-inspired Unity game with evolutionary learning. Start with 200 runners, save each generation's champion, then test its brain on a new course or challenge it yourself. Training and human play share the same deterministic physics.
+
+![ChromeDinoBrainTrain main menu with training and evaluation choices](Docs/Images/main-menu.png)
+
+| Train | Evaluate | Compete |
+| --- | --- | --- |
+| Evolve 200 agents at up to 30× simulation speed. | Watch a saved champion on a fresh or recorded course. | Race the bot with the same obstacles and controls. |
+
+**Unity:** 6000.3.8f1 · **Scenes:** MainMenu / Training / AITest · **Interface:** English
+
+The menu and scene-selection workflow match [FlappyBirdBrainTrain](https://github.com/giorgitopuriagio-netizen/FlappyBirdBrainTrain): **New training**, **Continue training**, and **AI evaluation / Human vs bot**. Evaluation has one combined generation-brain list and mode buttons that start or restart a round immediately. The runner retains its own jump, duck, obstacle, and scoring rules.
 
 ## Getting started
 
@@ -33,6 +43,10 @@ For a Windows build, use **Chrome Dino > Build Windows**. Output: `Builds/Window
 Switching windows pauses training and saves it; click **Resume** after returning. Competition also pauses on focus loss and waits for a new human jump to resume. Bot-only evaluation resumes automatically when focus returns. **Esc** stops the current round or training session.
 
 Early agents can crash quickly. Since generations face different courses, performance need not improve in every generation.
+
+![Human versus bot with a saved champion and shared course](Docs/Images/human-vs-bot.png)
+
+The interface uses TextMesh Pro for scalable text and a pixel-aligned board for the original Dino silhouettes. Day and night palettes keep both participants visible. See [interface and rendering notes](Docs/VISUALS.md) for implementation and review steps.
 
 ## Game rules
 
@@ -91,6 +105,6 @@ Generated reports and UI previews are written to `TestResults/`; Unity logs are 
 
 ## Repository cleanup
 
-The repository contains the active three scenes, scripts, tests, project settings, package declarations, and the sprite atlas in `Assets/Resources/DinoAtlas.png`. Old scripts/prefabs, the duplicate SampleScene, generated IDE projects, editor layouts, and cache/log files have been removed from the tracked project. Unity regenerates its local working files when needed. Unused 2D, navigation, timeline, visual scripting, multiplayer, and obsolete IDE packages have been removed.
+The repository contains the three active scenes, scripts, tests, project settings, package declarations, the original Dino sprite atlas, and the TextMesh Pro resources required to render the interface. Old scripts/prefabs, the duplicate SampleScene, generated IDE projects, editor layouts, and cache/log files have been removed from the tracked project. Unity regenerates its local working files when needed. Unused 2D, navigation, timeline, visual scripting, multiplayer, and obsolete IDE packages have been removed.
 
 Original versions remain in Git history. The runner recreates familiar Chrome Dino behavior in Unity; it does not claim bit-for-bit equivalence with the browser implementation.

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using TMPro;
 using ChromeDino.Core;
 using ChromeDino.Persistence;
 using ChromeDino.Presentation;
@@ -20,7 +21,7 @@ namespace ChromeDino.Tests
         private static Button Button(string text)
         {
             return UnityEngine.Object.FindObjectsByType<Button>(FindObjectsSortMode.None)
-                .Single(button => button.GetComponentInChildren<Text>()?.text == text);
+                .Single(button => button.GetComponentInChildren<TMP_Text>()?.text == text);
         }
         private static AITestScreen Screen { get { return UnityEngine.Object.FindFirstObjectByType<AITestScreen>(); } }
 
@@ -129,7 +130,7 @@ namespace ChromeDino.Tests
             yield return null;
             yield return null;
             Assert.AreEqual("AITest", SceneManager.GetActiveScene().name);
-            Assert.AreEqual(1, UnityEngine.Object.FindObjectsByType<Dropdown>(FindObjectsSortMode.None).Length);
+            Assert.AreEqual(1, UnityEngine.Object.FindObjectsByType<TMP_Dropdown>(FindObjectsSortMode.None).Length);
             Button("Watch bot").onClick.Invoke();
             yield return new WaitForSecondsRealtime(0.1f);
             Assert.Greater(Screen.CurrentRound.World.Ticks, 0, "Mode button did not immediately start the bot.");
@@ -144,7 +145,7 @@ namespace ChromeDino.Tests
             AddChampion("first-run", 12345);
             AddChampion("second-run", 999);
             yield return OpenEvaluation();
-            var dropdown = UnityEngine.Object.FindFirstObjectByType<Dropdown>();
+            var dropdown = UnityEngine.Object.FindFirstObjectByType<TMP_Dropdown>();
             Assert.AreEqual(2, dropdown.options.Count);
             Assert.IsTrue(dropdown.options.Any(option => option.text.Contains("run 1")));
             Assert.IsTrue(dropdown.options.Any(option => option.text.Contains("run 2")));

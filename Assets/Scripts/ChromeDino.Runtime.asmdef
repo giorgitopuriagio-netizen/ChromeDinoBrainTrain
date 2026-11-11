@@ -1,5 +1,9 @@
 {
   "name": "ChromeDino.Runtime",
   "rootNamespace": "ChromeDino",
-  "references": ["ChromeDino.Core", "UnityEngine.UI"]
+  "references": [
+    "ChromeDino.Core",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ]
 }

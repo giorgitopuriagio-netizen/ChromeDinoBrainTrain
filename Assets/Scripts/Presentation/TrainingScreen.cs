@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using TMPro;
 using ChromeDino.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,9 +12,10 @@ namespace ChromeDino.Presentation
     {
         private TrainingSession session;
         private BoardView board;
-        private Text statistics;
-        private Text message;
-        private Text pauseLabel;
+        private TMP_Text generationStat, aliveStat, scoreStat, bestStat, status, timing;
+        private readonly Button[] speedButtons = new Button[4];
+        private TMP_Text message;
+        private TMP_Text pauseLabel;
         private Button pauseButton;
         private Button stopButton;
         private Button testButton;
@@ -27,37 +29,46 @@ namespace ChromeDino.Presentation
         private double accumulator;
         private float nextAutosave;
         private readonly Stopwatch budget = new Stopwatch();
+        private static readonly int[] Speeds = { 1, 5, 10, 30 };
 
         private void Start()
         {
             var ui = new UIFactory();
-            ui.Header("Training / Genetic algorithm");
+            ui.Header("Training");
             board = BoardView.Create(ui);
-            statistics = ui.Label(ui.Root, "", 60, 430, 560, 260, 26);
-            ui.Label(ui.Root, "Training speed", 680, 430, 520, 35, 21, UIFactory.Muted);
-            int[] speeds = { 1, 5, 10, 30 };
-            for (int i = 0; i < speeds.Length; i++)
+            var card = ui.Card(40, 452, 576, 292);
+            status = ui.Label(card, "TRAINING", 24, 18, 520, 26, 15, UIFactory.Accent,
+                TextAlignmentOptions.TopLeft, true);
+            generationStat = ui.Stat(card, "GENERATION", 24, 65, 240);
+            aliveStat = ui.Stat(card, "RUNNERS ALIVE", 300, 65, 250);
+            scoreStat = ui.Stat(card, "CURRENT SCORE", 24, 177, 240);
+            bestStat = ui.Stat(card, "BEST SCORE", 300, 177, 250);
+            timing = ui.Label(ui.Root, "", 42, 762, 572, 66, 17, UIFactory.Muted);
+            ui.Label(ui.Root, "TRAINING SPEED", 672, 452, 568, 26, 15, UIFactory.Muted);
+            for (int i = 0; i < Speeds.Length; i++)
             {
-                int value = speeds[i];
-                ui.Button(ui.Root, "×" + value, 680 + i * 133, 475, 120, 50, () => speed = value);
+                int value = Speeds[i];
+                speedButtons[i] = ui.Button(ui.Root, "×" + value, 672 + i * 146, 492, 130, 50, () => speed = value);
             }
-            pauseButton = ui.Button(ui.Root, "Pause", 680, 548, 520, 54, TogglePause);
-            pauseLabel = pauseButton.GetComponentInChildren<Text>();
-            stopButton = ui.Button(ui.Root, "Stop and save", 680, 620, 520, 60, StopTraining, true);
-            ui.Button(ui.Root, "Main menu", 680, 702, 245, 52, () => { if (StopAndSave()) AppServices.MainMenu(); });
-            testButton = ui.Button(ui.Root, "Evaluate AI", 945, 702, 255, 52, () => { if (StopAndSave()) AppServices.OpenTest(); });
-            message = ui.Label(ui.Root, "", 60, 730, 570, 110, 19, UIFactory.Muted);
-            ui.Label(ui.Root, "Each generation's last survivor is saved to the archive.", 60, 855, 1140, 30, 19, UIFactory.Muted);
+            pauseButton = ui.Button(ui.Root, "Pause", 672, 564, 568, 54, TogglePause);
+            pauseLabel = pauseButton.GetComponentInChildren<TMP_Text>();
+            stopButton = ui.Button(ui.Root, "Stop and save", 672, 636, 568, 60, StopTraining, true);
+            ui.Button(ui.Root, "Main menu", 672, 716, 272, 52, () => { if (StopAndSave()) AppServices.MainMenu(); });
+            testButton = ui.Button(ui.Root, "Evaluate AI", 960, 716, 280, 52, () => { if (StopAndSave()) AppServices.OpenTest(); });
+            message = ui.Label(ui.Root, "", 672, 788, 568, 52, 16, UIFactory.Muted);
+            ui.Footer("Champions are saved to the archive. Pause or stop at any time; your progress is kept.");
 
             session = AppServices.Training;
             if (session == null)
             {
                 stopped = true;
-                statistics.text = "Start training from the main menu.";
-                ui.Button(ui.Root, "Train from scratch", 60, 500, 540, 58, () => TryOpen(AppServices.StartNewTraining), true);
-                ui.Button(ui.Root, "Continue latest training", 60, 580, 540, 58, () => TryOpen(AppServices.ContinueTraining));
+                foreach (var label in card.GetComponentsInChildren<TMP_Text>())
+                    if (label != status) label.gameObject.SetActive(false);
+                status.text = "NO ACTIVE SESSION";
+                ui.Button(ui.Root, "Train from scratch", 64, 530, 528, 58, () => TryOpen(AppServices.StartNewTraining), true);
+                ui.Button(ui.Root, "Continue latest training", 64, 610, 528, 58, () => TryOpen(AppServices.ContinueTraining));
             }
-            else message.text = "Training continues until you press Stop and save.\nAutosave: every 30 seconds and after each generation.";
+            else message.text = "Progress saves every 30 seconds and after each generation.";
             nextAutosave = Time.unscaledTime + 30;
             Refresh();
         }
@@ -130,7 +141,7 @@ namespace ChromeDino.Presentation
             catch (Exception error)
             {
                 paused = true;
-                message.text = "Could not save: " + error.Message + "\nResolve the issue and press Stop and save again.";
+                message.text = "Save failed: " + error.Message + "\nCheck the save folder, then try Stop and save again.";
                 Debug.LogException(error);
                 return false;
             }
@@ -143,7 +154,7 @@ namespace ChromeDino.Presentation
             if (!Save()) return false;
             stopped = true;
             accumulator = 0;
-            if (session != null) message.text = "Training stopped and saved.\nThe unfinished generation will resume from here.\nArchived winners and the last survivor can be evaluated.";
+            if (session != null) message.text = "Progress saved. Continue this generation from the main menu, or evaluate a saved champion.";
             Refresh();
             return true;
         }
@@ -153,17 +164,24 @@ namespace ChromeDino.Presentation
             if (session != null)
             {
                 int currentScore = 0;
-                foreach (var bird in session.World.Dinos) currentScore = Math.Max(currentScore, bird.score);
-                statistics.text = "Generation  " + session.Generation + "\nAlive  " + session.World.AliveCount + " / " + session.PopulationSize +
-                    "\nScore  " + currentScore + "    Best  " + session.BestScore +
-                    "\nAttempt time  " + (session.World.Ticks * GameRules.Step).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " s" +
-                    "\nSpeed  ×" + speed + "    " + (stopped ? "STOPPED" : paused ? "PAUSED" : "TRAINING") +
-                    (lastChampionGeneration > 0 ? "\nSaved: generation " + lastChampionGeneration + ", points " + lastChampionScore : "");
+                foreach (var dino in session.World.Dinos) currentScore = Math.Max(currentScore, dino.score);
+                generationStat.text = session.Generation.ToString();
+                aliveStat.text = session.World.AliveCount + "<size=21><color=#586677> / " + session.PopulationSize + "</color></size>";
+                scoreStat.text = currentScore.ToString();
+                bestStat.text = session.BestScore.ToString();
+                status.text = stopped ? "SAVED / STOPPED" : paused ? "PAUSED" : "TRAINING IN PROGRESS";
+                timing.text = "Attempt: " + (session.World.Ticks * GameRules.Step).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) +
+                    " s   ·   Speed: ×" + speed + (lastChampionGeneration > 0 ? "   ·   Saved gen " + lastChampionGeneration + ": " + lastChampionScore + " pts" : "");
             }
             pauseButton.interactable = session != null && !stopped;
             stopButton.interactable = session != null && !stopped;
             testButton.interactable = session != null && (session.Generation > 1 || session.World.AliveCount == 1);
             pauseLabel.text = paused ? "Resume" : "Pause";
+            for (int i = 0; i < speedButtons.Length; i++)
+            {
+                speedButtons[i].interactable = session != null && !stopped;
+                UIFactory.SetSelected(speedButtons[i], speed == Speeds[i]);
+            }
         }
 
         private void OnApplicationPause(bool value)

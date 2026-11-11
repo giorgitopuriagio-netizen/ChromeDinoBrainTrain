@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ChromeDino.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,13 +12,14 @@ namespace ChromeDino.Presentation
     {
         private Texture2D atlas;
         private Image background;
+        private Material spriteMaterial;
         private RectTransform obstacleRoot;
         private RectTransform dinoRoot;
         private RawImage[] ground;
         private RawImage[] clouds;
-        private Text score;
-        private Text overlay;
-        private Text legend;
+        private TMP_Text score;
+        private TMP_Text overlay;
+        private TMP_Text legend;
         private readonly List<RawImage> obstacleViews = new List<RawImage>();
         private readonly List<RawImage> dinoViews = new List<RawImage>();
         private bool ready;
@@ -27,12 +29,14 @@ namespace ChromeDino.Presentation
 
         public static BoardView Create(UIFactory ui)
         {
-            var rect = UIFactory.Rect("Chrome Dino field", ui.Root, 60, 105, 600, 150);
-            rect.localScale = Vector3.one * (1160f / 600);
+            var rect = UIFactory.Rect("Chrome Dino field", ui.Root, 40, 112, 600, 150);
+            rect.localScale = Vector3.one * 2;
             rect.gameObject.AddComponent<RectMask2D>();
             var view = rect.gameObject.AddComponent<BoardView>();
             view.atlas = Resources.Load<Texture2D>("DinoAtlas");
             if (view.atlas == null) throw new InvalidOperationException("DinoAtlas is missing from Resources.");
+            view.spriteMaterial = Resources.Load<Material>("DinoInk");
+            if (view.spriteMaterial == null) throw new InvalidOperationException("The Dino sprite material is missing from Resources.");
             view.background = ui.Panel(rect, 0, 0, 600, 150, Color.white);
             view.background.raycastTarget = true;
             view.clouds = new RawImage[3];
@@ -41,9 +45,10 @@ namespace ChromeDino.Presentation
                 view.Crop(rect, new Rect(1202, 0, 1200, 26), 600, 137, 600, 13) };
             view.obstacleRoot = UIFactory.Rect("Obstacles", rect, 0, 0, 600, 150);
             view.dinoRoot = UIFactory.Rect("Runners", rect, 0, 0, 600, 150);
-            view.score = ui.Label(rect, "", 360, 8, 225, 22, 14, UIFactory.Ink, TextAnchor.UpperRight);
-            view.overlay = ui.Label(rect, "", 150, 47, 420, 38, 18, UIFactory.Ink, TextAnchor.MiddleCenter);
-            view.legend = ui.Label(rect, "", 10, 8, 260, 20, 11, UIFactory.Muted);
+            view.score = ui.Label(rect, "", 330, 10, 255, 24, 12, UIFactory.Ink, TextAlignmentOptions.TopRight);
+            view.score.characterSpacing = 1.5f;
+            view.overlay = ui.Label(rect, "", 100, 53, 420, 40, 17, UIFactory.Ink, TextAlignmentOptions.Center, true);
+            view.legend = ui.Label(rect, "", 12, 10, 300, 24, 10, UIFactory.Muted);
             view.Render(null);
             return view;
         }
@@ -52,6 +57,7 @@ namespace ChromeDino.Presentation
         {
             var image = UIFactory.Rect("Sprite", parent, x, y, width, height).gameObject.AddComponent<RawImage>();
             image.texture = atlas;
+            image.material = spriteMaterial;
             image.uvRect = new Rect(source.x / atlas.width, source.y / atlas.height, source.width / atlas.width, source.height / atlas.height);
             image.raycastTarget = false;
             return image;
@@ -72,11 +78,11 @@ namespace ChromeDino.Presentation
             score.color = overlay.color = legend.color = ink;
             ground[0].rectTransform.anchoredPosition = new Vector2(-(float)(distance % 600), -137);
             ground[1].rectTransform.anchoredPosition = new Vector2(600 - (float)(distance % 600), -137);
-            for (int i = 0; i < ground.Length; i++) ground[i].color = night ? Color.white : new Color(0.65f, 0.65f, 0.65f);
+            for (int i = 0; i < ground.Length; i++) ground[i].color = ink;
             for (int i = 0; i < clouds.Length; i++)
             {
                 clouds[i].rectTransform.anchoredPosition = new Vector2(650 - (float)((distance * 0.035 + i * 231) % 750), -25 - i * 12);
-                clouds[i].color = night ? new Color(1, 1, 1, 0.35f) : Color.white;
+                clouds[i].color = new Color(ink.r, ink.g, ink.b, night ? 0.35f : 0.26f);
             }
             int count = world == null ? 0 : world.Obstacles.Count;
             while (obstacleViews.Count < count) obstacleViews.Add(Crop(obstacleRoot, new Rect(), 0, 0, 1, 1));
@@ -98,7 +104,7 @@ namespace ChromeDino.Presentation
                 image.uvRect = new Rect(source.x / atlas.width, source.y / atlas.height, source.width / atlas.width, source.height / atlas.height);
                 image.rectTransform.sizeDelta = new Vector2((float)obstacle.Width, (float)obstacle.Height);
                 image.rectTransform.anchoredPosition = new Vector2((float)obstacle.x, (float)(-140 + obstacle.bottom + obstacle.Height));
-                image.color = night ? new Color(1.8f, 1.8f, 1.8f) : Color.white;
+                image.color = ink;
             }
             int runners = world == null ? 1 : world.Dinos.Length;
             while (dinoViews.Count < runners) dinoViews.Add(Crop(dinoRoot, new Rect(), 0, 0, 44, 47));
@@ -118,8 +124,8 @@ namespace ChromeDino.Presentation
                 float height = duck ? 30.5f : 47.5f;
                 image.rectTransform.sizeDelta = new Vector2(duck ? 59 : 44, height);
                 image.rectTransform.anchoredPosition = new Vector2(50, -140 + height + (float)(dino == null ? 0 : dino.y));
-                Color color = versus && i == 1 ? new Color32(70, 140, 220, 255) : Color.white;
-                if (runners > 2) color.a = 0.2f;
+                Color color = versus && i == 1 ? (night ? new Color32(111, 179, 255, 255) : new Color32(39, 99, 190, 255)) : ink;
+                if (runners > 2) color.a = 0.24f;
                 if (dino != null && !dino.alive) color.a = 0.35f;
                 image.color = color;
             }
@@ -131,8 +137,8 @@ namespace ChromeDino.Presentation
             }
             int best = PlayerPrefs.GetInt("DinoHighScore", 0);
             score.text = "HI " + best.ToString("D5") + "   " + displayedScore.ToString("D5");
-            overlay.text = gameOver ? "G A M E  O V E R" : ready ? "SPACE / TAP TO START" : world == null ? "CHROME DINO" : "";
-            legend.text = versus ? "Gray: bot   Blue: human" : world != null && runners > 2 ? "Population: " + world.AliveCount : "";
+            overlay.text = gameOver ? "GAME OVER" : ready ? "SPACE / TAP TO RUN" : world == null ? "JUMP. DUCK. REPEAT." : "";
+            legend.text = versus ? "BOT / GRAY    HUMAN / BLUE" : world != null && runners > 2 ? "RUNNERS ALIVE  " + world.AliveCount : "";
         }
     }
 }
