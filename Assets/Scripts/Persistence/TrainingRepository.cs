@@ -41,9 +41,22 @@ namespace ChromeDino.Persistence
         public TrainingSession LoadLatest()
         {
             string latestPath = Path.Combine(RootPath, "latest.txt");
-            if (!File.Exists(latestPath)) throw new FileNotFoundException("No saved training session was found.");
-            string runId = File.ReadAllText(latestPath).Trim();
-            ValidateRunId(runId);
+            if (!File.Exists(latestPath) && !File.Exists(latestPath + ".bak"))
+                throw new FileNotFoundException("No saved training session was found.");
+            string runId = null;
+            Exception pointerError = null;
+            foreach (string candidate in new[] { latestPath, latestPath + ".bak" })
+            {
+                try
+                {
+                    string candidateId = ReadLimited(candidate, 1024).Trim();
+                    ValidateRunId(candidateId);
+                    runId = candidateId;
+                    break;
+                }
+                catch (Exception error) when (IsDataError(error)) { pointerError = error; }
+            }
+            if (runId == null) throw new InvalidDataException("Could not read the latest training pointer or its backup.", pointerError);
             string path = Path.Combine(RootPath, runId, "checkpoint.json");
             Exception primaryError;
             try { return ReadSession(path, runId); }
@@ -69,16 +82,29 @@ namespace ChromeDino.Persistence
             if (!Directory.Exists(RootPath)) return champions;
             foreach (string directory in Directory.GetDirectories(RootPath))
             {
-                foreach (string path in Directory.GetFiles(directory, "generation-*.json"))
+                var paths = Directory.GetFiles(directory, "generation-*")
+                    .Where(path => path.EndsWith(".json", StringComparison.Ordinal) || path.EndsWith(".json.bak", StringComparison.Ordinal))
+                    .Select(path => path.EndsWith(".bak", StringComparison.Ordinal) ? path.Substring(0, path.Length - 4) : path)
+                    .Distinct(StringComparer.Ordinal);
+                foreach (string path in paths)
                 {
-                    try
+                    GenerationChampion loaded = null;
+                    foreach (string candidate in new[] { path, path + ".bak" })
                     {
-                        var champion = TrainingJson.ReadChampion(ReadLimited(path, 2 * 1024 * 1024));
-                        ValidateChampion(champion);
-                        if (champion.runId != Path.GetFileName(directory)) throw new InvalidDataException("Archive run ID mismatch.");
-                        champions.Add(champion);
+                        try
+                        {
+                            var champion = TrainingJson.ReadChampion(ReadLimited(candidate, 2 * 1024 * 1024));
+                            ValidateChampion(champion);
+                            if (champion.runId != Path.GetFileName(directory) ||
+                                Path.GetFileName(path) != "generation-" + champion.generation.ToString("D8", CultureInfo.InvariantCulture) + ".json")
+                                throw new InvalidDataException("Archive identity mismatch.");
+                            loaded = champion;
+                            break;
+                        }
+                        catch (Exception error) when (IsDataError(error)) { }
                     }
-                    catch (Exception error) when (IsDataError(error)) { unreadableFiles++; }
+                    if (loaded == null) unreadableFiles++;
+                    else champions.Add(loaded);
                 }
             }
             return champions.OrderByDescending(champion => champion.runId, StringComparer.Ordinal)
@@ -104,7 +130,7 @@ namespace ChromeDino.Persistence
 
         private static bool IsDataError(Exception error)
         {
-            return error is IOException || error is ArgumentException || error is UnauthorizedAccessException;
+            return error is IOException || error is InvalidDataException || error is ArgumentException || error is UnauthorizedAccessException;
         }
 
         private static string ReadLimited(string path, long maximumBytes)

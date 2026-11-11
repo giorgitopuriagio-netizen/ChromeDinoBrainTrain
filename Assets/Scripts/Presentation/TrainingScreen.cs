@@ -31,33 +31,33 @@ namespace ChromeDino.Presentation
         private void Start()
         {
             var ui = new UIFactory();
-            ui.Header("Обучение / генетический алгоритм");
+            ui.Header("Training / Genetic algorithm");
             board = BoardView.Create(ui);
             statistics = ui.Label(ui.Root, "", 60, 430, 560, 260, 26);
-            ui.Label(ui.Root, "Скорость обучения", 680, 430, 520, 35, 21, UIFactory.Muted);
+            ui.Label(ui.Root, "Training speed", 680, 430, 520, 35, 21, UIFactory.Muted);
             int[] speeds = { 1, 5, 10, 30 };
             for (int i = 0; i < speeds.Length; i++)
             {
                 int value = speeds[i];
                 ui.Button(ui.Root, "×" + value, 680 + i * 133, 475, 120, 50, () => speed = value);
             }
-            pauseButton = ui.Button(ui.Root, "Пауза", 680, 548, 520, 54, TogglePause);
+            pauseButton = ui.Button(ui.Root, "Pause", 680, 548, 520, 54, TogglePause);
             pauseLabel = pauseButton.GetComponentInChildren<Text>();
-            stopButton = ui.Button(ui.Root, "Остановить и сохранить", 680, 620, 520, 60, StopTraining, true);
-            ui.Button(ui.Root, "В меню", 680, 702, 245, 52, () => { if (StopAndSave()) AppServices.MainMenu(); });
-            testButton = ui.Button(ui.Root, "Проверить ИИ", 945, 702, 255, 52, () => { if (StopAndSave()) AppServices.OpenTest(); });
+            stopButton = ui.Button(ui.Root, "Stop and save", 680, 620, 520, 60, StopTraining, true);
+            ui.Button(ui.Root, "Main menu", 680, 702, 245, 52, () => { if (StopAndSave()) AppServices.MainMenu(); });
+            testButton = ui.Button(ui.Root, "Evaluate AI", 945, 702, 255, 52, () => { if (StopAndSave()) AppServices.OpenTest(); });
             message = ui.Label(ui.Root, "", 60, 730, 570, 110, 19, UIFactory.Muted);
-            ui.Label(ui.Root, "Победители поколений сохраняются в архив.", 60, 855, 1140, 30, 19, UIFactory.Muted);
+            ui.Label(ui.Root, "Each generation's last survivor is saved to the archive.", 60, 855, 1140, 30, 19, UIFactory.Muted);
 
             session = AppServices.Training;
             if (session == null)
             {
                 stopped = true;
-                statistics.text = "Начни обучение из главного меню.";
-                ui.Button(ui.Root, "Начать с нуля", 60, 500, 540, 58, () => TryOpen(AppServices.StartNewTraining), true);
-                ui.Button(ui.Root, "Продолжить последнее", 60, 580, 540, 58, () => TryOpen(AppServices.ContinueTraining));
+                statistics.text = "Start training from the main menu.";
+                ui.Button(ui.Root, "Train from scratch", 60, 500, 540, 58, () => TryOpen(AppServices.StartNewTraining), true);
+                ui.Button(ui.Root, "Continue latest training", 60, 580, 540, 58, () => TryOpen(AppServices.ContinueTraining));
             }
-            else message.text = "Обучение продолжается до остановки.\nАвтосохранение каждые 30 секунд и после поколения.";
+            else message.text = "Training continues until you press Stop and save.\nAutosave: every 30 seconds and after each generation.";
             nextAutosave = Time.unscaledTime + 30;
             Refresh();
         }
@@ -130,7 +130,7 @@ namespace ChromeDino.Presentation
             catch (Exception error)
             {
                 paused = true;
-                message.text = "Ошибка сохранения: " + error.Message + "\nУстрани причину и повтори остановку.";
+                message.text = "Could not save: " + error.Message + "\nResolve the issue and press Stop and save again.";
                 Debug.LogException(error);
                 return false;
             }
@@ -143,7 +143,7 @@ namespace ChromeDino.Presentation
             if (!Save()) return false;
             stopped = true;
             accumulator = 0;
-            if (session != null) message.text = "Обучение остановлено и сохранено.\nПродолжение восстановит текущий забег.\nПобедители доступны для проверки.";
+            if (session != null) message.text = "Training stopped and saved.\nThe unfinished generation will resume from here.\nArchived winners and the last survivor can be evaluated.";
             Refresh();
             return true;
         }
@@ -153,17 +153,17 @@ namespace ChromeDino.Presentation
             if (session != null)
             {
                 int currentScore = 0;
-                foreach (var dino in session.World.Dinos) currentScore = Math.Max(currentScore, dino.score);
-                statistics.text = "Поколение  " + session.Generation + "\nЖивы  " + session.World.AliveCount + " / " + session.PopulationSize +
-                    "\nОчки  " + currentScore + "    Рекорд  " + session.BestScore +
-                    "\nВремя забега  " + (session.World.Ticks * GameRules.Step).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " с" +
-                    "\nУскорение  ×" + speed + "    " + (stopped ? "ОСТАНОВЛЕНО" : paused ? "ПАУЗА" : "ОБУЧЕНИЕ") +
-                    (lastChampionGeneration > 0 ? "\nСохранено: поколение " + lastChampionGeneration + ", очков " + lastChampionScore : "");
+                foreach (var bird in session.World.Dinos) currentScore = Math.Max(currentScore, bird.score);
+                statistics.text = "Generation  " + session.Generation + "\nAlive  " + session.World.AliveCount + " / " + session.PopulationSize +
+                    "\nScore  " + currentScore + "    Best  " + session.BestScore +
+                    "\nAttempt time  " + (session.World.Ticks * GameRules.Step).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " s" +
+                    "\nSpeed  ×" + speed + "    " + (stopped ? "STOPPED" : paused ? "PAUSED" : "TRAINING") +
+                    (lastChampionGeneration > 0 ? "\nSaved: generation " + lastChampionGeneration + ", points " + lastChampionScore : "");
             }
             pauseButton.interactable = session != null && !stopped;
             stopButton.interactable = session != null && !stopped;
             testButton.interactable = session != null && (session.Generation > 1 || session.World.AliveCount == 1);
-            pauseLabel.text = paused ? "Продолжить" : "Пауза";
+            pauseLabel.text = paused ? "Resume" : "Pause";
         }
 
         private void OnApplicationPause(bool value)
@@ -174,8 +174,8 @@ namespace ChromeDino.Presentation
             Save();
         }
 
-        private void OnApplicationQuit() { if (session != null) Save(); }
-
         private void OnApplicationFocus(bool value) { if (!value) OnApplicationPause(true); }
+
+        private void OnApplicationQuit() { if (session != null) Save(); }
     }
 }

@@ -188,6 +188,64 @@ internal static class Program
             try { new DinoWorld(snapshot); } catch (ArgumentException) { rejected = true; }
             Check(rejected, "Non-finite distance accepted.");
         });
+        Run("Evaluation modes always own matching runners", () =>
+        {
+            var brain = BrainGenome.Create(new DeterministicRandom(512));
+            var watch = new EvaluationSession(brain, 12, EvaluationMode.WatchBot);
+            var versus = new EvaluationSession(brain, 12, EvaluationMode.HumanVsBot);
+            Check(watch.World.Dinos.Length == 1 && watch.Human == null && !watch.HasHuman, "Bot-only population mismatch.");
+            Check(versus.World.Dinos.Length == 2 && versus.Human == versus.World.Dinos[1] && versus.HasHuman, "Competition population mismatch.");
+            versus.SetHumanInput(true, true);
+            versus.Stop();
+            int ticks = versus.World.Ticks;
+            versus.RequestJump(); versus.Tick();
+            Check(versus.State == EvaluationState.Stopped && versus.World.Ticks == ticks, "Stopped round accepts controls.");
+        });
+        Run("Competition waits and consumes a queued tap once", () =>
+        {
+            var round = new EvaluationSession(BrainGenome.Create(new DeterministicRandom(13)), 14, EvaluationMode.HumanVsBot);
+            for (int i = 0; i < 60; i++) round.Tick();
+            Check(round.World.Ticks == 0 && round.State == EvaluationState.WaitingForHuman, "Round moved before first jump.");
+            round.RequestJump(); round.Tick();
+            Check(round.Human.y > 0 && round.State == EvaluationState.Running, "First press did not jump/start.");
+            for (int i = 0; i < 65; i++) round.Tick();
+            Check(round.Human.y == 0 && !round.Human.jumpHeld, "Queued jump repeats after landing.");
+        });
+        Run("Pause clears held input and accepts a fresh jump", () =>
+        {
+            var round = new EvaluationSession(BrainGenome.Create(new DeterministicRandom(15)), 16, EvaluationMode.HumanVsBot);
+            round.RequestJump(); round.SetHumanInput(true, false);
+            for (int i = 0; i < 65; i++) round.Tick();
+            Check(round.Human.y == 0 && round.Human.jumpHeld, "Held jump setup failed.");
+            round.Pause();
+            int ticks = round.World.Ticks;
+            round.Tick();
+            Check(round.World.Ticks == ticks && round.State == EvaluationState.Paused, "Paused round advances.");
+            round.RequestJump(); round.Tick();
+            Check(round.Human.y > 0 && round.State == EvaluationState.Running, "Pause retained an old jump latch.");
+            round.SetHumanInput(false, true); round.Pause(); round.Resume();
+            for (int i = 0; i < 65; i++) round.Tick();
+            Check(!round.Human.ducking, "Paused round retained held duck input.");
+        });
+        Run("Human controls do not affect bot decisions", () =>
+        {
+            var brain = BrainGenome.Create(new DeterministicRandom(17));
+            var watch = new EvaluationSession(brain, 18, EvaluationMode.WatchBot);
+            var versus = new EvaluationSession(brain, 18, EvaluationMode.HumanVsBot);
+            versus.RequestJump();
+            for (int i = 0; i < 200; i++)
+            {
+                watch.SetHumanInput(true, true); watch.RequestJump();
+                watch.Tick(); versus.Tick();
+                Check(Json(watch.Bot) == Json(versus.Bot), "Bot gets different physics or decisions by mode.");
+            }
+            watch.Pause();
+            int ticks = watch.World.Ticks;
+            watch.Tick();
+            Check(watch.World.Ticks == ticks, "Paused bot advances.");
+            watch.Resume(); watch.Tick();
+            Check(watch.World.Ticks > ticks, "Bot cannot resume.");
+        });
         Console.WriteLine(passed + " core checks passed.");
         if (args.Contains("--training-smoke")) TrainingSmoke();
     }

@@ -1,30 +1,46 @@
-# Аудит Chrom-Dino
+# Project audit
 
-Дата: 11 ноября 2026.
+Reviewed on 11 November 2026. Target: **ChromeDinoBrainTrain**. Reference workflow: **FlappyBirdBrainTrain**.
 
-## Исправленные проблемы исходной реализации
+## Menu and scene flow
 
-1. `Dino.Update()` обращался к `enemies[0]` без проверки длины. Пустой список приводил к исключению. Каждый Dino также удалял элементы общего списка, делая результат зависимым от порядка Update. Теперь список принадлежит только миру.
-2. Уничтоженные объекты оставались в списке спавнера, создавая обращения к отсутствующим Unity-объектам. Препятствия теперь обычные данные, которые удаляет симуляция.
-3. Поколение завершалось при `deads == 10`, независимо от `dinoPopulation`. Глобальные статические счётчики переживали перезапуски. Новое обучение изолировано в `TrainingSession` и поддерживает 2–1000 особей.
-4. `Neuron` и `GeneticAlgorithm` наследовались от MonoBehaviour и создавались через `new`. Теперь это обычные C#-объекты.
-5. Фитнес задавался абсолютным `Time.time` и не использовался в отборе; порядок смерти зависел от Unity-callback. Отбор теперь основан на детерминированном времени жизни, с явным правилом равенства.
-6. Скрещивание делило изменяемые массивы с родителями; элитизма не было. Теперь все геномы независимы, лучшие сохраняются без изменений.
-7. Мутация начинала с нулевого массива и фактически заменяла веса случайными числами. Теперь изменение прибавляется к существующему весу; мутируют также обучаемые смещения.
-8. Три ненормализованных входа не описывали скорость бега, полёт и высоту препятствия. Новая сеть имеет 10 нормализованных входов и 2 выхода для прыжка и пригибания.
-9. Прыжок проверялся по абсолютной координате `transform.position.y`, а не по контакту с землёй. Теперь состояние земли определяет сама физика; двойной прыжок и автоматические прыжки от удержания исключены.
-10. У препятствий была постоянная скорость, птицы не имели игрового поведения, а интервалы спавна не зависели от скорости. Теперь есть ускорение, группы кактусов, три высоты птиц, безопасное начальное время и интервалы, зависящие от скорости и размера.
-11. Не было сохранения обучения, выбора победителя, ручной игры и состязания. Добавлены те же основные режимы и слои архитектуры, что во FlappyBirdBrainTrain.
+The active scenes are MainMenu, Training, and AITest. MainMenu offers the same three actions as the reference: New training, Continue training, and AI evaluation / Human vs bot.
 
-## Проверка
+Evaluation now uses one generation-brain dropdown containing champions from every saved run. Run numbers distinguish repeated generation numbers. Watch bot and Human vs bot immediately construct a fresh round. Mode buttons stay available during a round; the generation and course selectors remain locked until it finishes or is stopped. The separate run selector, Start/Retry button, and standalone-human mode were removed to match the requested reference workflow. Human play remains available through competition.
 
-- 15 проверок чистого ядра: успешно.
-- По 40 поколений для seed 314159, 271828, 161803: начальный победитель 58, 58, 72 очка; лучший результат 878, 1731, 1644 соответственно. Разные поколения получают разные трассы, поэтому результаты отдельных поколений колеблются.
-- На десяти новых трассах (seed 10001–10010) средние результаты начального/обученного победителя: 40,4/606,7; 50,3/763,0; 56,2/900,6 очка. Эта проверка включена в `--training-smoke`.
-- Возобновление после сериализации совпадает по всем состояниям и следующим победителям; записанный чемпион повторяет исходный результат на своей трассе.
-- Unity Edit Mode: 6/6 успешно; Play Mode: 2/2 успешно. Снимки меню, обучения, состязания и обычной игры сохранены в `TestResults/Previews/`.
-- Протоколы Unity и сборки сохраняются в `TestResults/` и `Logs/`.
+Interface text is in English. The horizontal Dino board, jumping, holding, ducking, and runner-specific obstacles are retained.
 
-Исходные материалы находятся в `Legacy~`. FlappyBirdBrainTrain используется как образец архитектуры, его исходники этим изменением не редактировались.
+## Fixed behavior
 
-Windows x64: successfully built Builds/Windows/ChromeDino.exe. A five-second hidden startup check without graphics found no exceptions; UI rendering was verified separately in Play Mode.
+| Issue | Change and verification |
+| --- | --- |
+| Round mode, world size, pilot, input array, and running flags were managed separately in the screen. | EvaluationSession owns the immutable mode and matching runner/action counts. Mode changes replace the complete round. Core and Play Mode checks cover repeated switches in both directions. |
+| Switching modes required stopping and pressing a separate Start button. | A mode button launches or restarts immediately, matching FlappyBirdBrainTrain. |
+| Choosing a different generation after a round could retain the previous world and overwrite the selection's statistics. | A new selection clears the old round, overlays, accumulated time, and input. |
+| A held jump could remain latched in the world after pausing, preventing a fresh press from jumping. | Pause clears both queued/held input and the human runner's jump latch. Competition resumes on a fresh human press. |
+| A right mouse-button release could cancel an active left-button hold. | HoldInput tracks the controlling pointer and respects mouse button and button-interactable state. |
+| Bot-only evaluation waited for manual input after focus returned. | Bot playback resumes automatically; competition waits for the human. Both clear accumulated time and pointer input on suspension. |
+| The final board score could exceed the recorded runner score by one point on the collision tick. | The ended board displays the maximum recorded participant score. Simulation rules and saved-brain compatibility are unchanged. |
+| A damaged/missing latest.txt prevented continuation even when latest.txt.bak was valid. | The pointer is size-limited, validated, and restored from its backup when necessary. Checkpoint loading continues to use the selected run rather than silently switching to another run if that run's checkpoint is damaged. |
+| A damaged or missing primary champion record made an intact backup unavailable. | The archive considers primary and backup records together, loads each generation once, and validates both run identity and generation filename. |
+| InvalidDataException was not classified as a recoverable data error. | Schema-invalid JSON now reaches checkpoint/pointer/archive backup handling. A dedicated test covers a syntactically valid but structurally invalid checkpoint. |
+
+## Training and gameplay review
+
+The existing deterministic fixed-step world, 10-16-10-2 network, biases, normalized sensors, genetic selection, crossover, additive mutation, elitism, and random immigrants were retained. No game-rules version or checkpoint schema change was needed.
+
+The checks verify identical bot behavior between evaluation modes, equal physics for participants, variable jump height, ducking and speed drop, cactus/bird hitboxes, clear time and acceleration, independent genomes, exact continuation, survivor handling, and champion replay. Completed generations still archive a winner and start the next population. A living last survivor remains playable without a forced timeout.
+
+Earlier 40-generation trials on seeds 314159, 271828, and 161803 improved best training scores from 58/58/72 to 878/1731/1644. Mean scores on unseen seeds 10001-10010 improved from 40.4/50.3/56.2 to 606.7/763.0/900.6. These historical experiments are reproducible with --training-smoke; scores on different courses need not improve monotonically.
+
+## Cleanup
+
+Removed items are listed in [CLEANUP.md](CLEANUP.md). The old implementation is already in Git history. A checked ZIP of the original tracked project was also created outside the repository before cleanup. Application.persistentDataPath and user training saves were not touched.
+
+FlappyBirdBrainTrain was read as a reference; its project files were not modified by this review.
+
+## Validation outputs
+
+Core, Edit Mode, Play Mode, build, and startup results are recorded in the generated TestResults/ and Logs/ directories. Play Mode captures menu, training, competition, and the running course. The root README documents the current workflow and commands.
+
+Verified results: **19 core checks, 10 Edit Mode tests, and 3 Play Mode scenarios passed (32 total)**. Three training smoke runs passed. The cleaned Windows build succeeded and passed a 10-second headless startup check without observed errors or exceptions. Rendered UI previews were inspected separately.

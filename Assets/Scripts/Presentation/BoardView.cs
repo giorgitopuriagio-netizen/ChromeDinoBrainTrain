@@ -62,7 +62,7 @@ namespace ChromeDino.Presentation
         public void OnPointerDown(PointerEventData data) { if (data.button == PointerEventData.InputButton.Left) Pressed?.Invoke(); }
         public void OnPointerUp(PointerEventData data) { if (data.button == PointerEventData.InputButton.Left) Released?.Invoke(); }
 
-        public void Render(DinoWorld world, bool versus = false, bool humanOnly = false)
+        public void Render(DinoWorld world, bool versus = false)
         {
             double distance = world == null ? Time.unscaledTime * 35 : world.Distance;
             int ticks = world == null ? (int)(Time.unscaledTime * 60) : world.Ticks;
@@ -118,15 +118,21 @@ namespace ChromeDino.Presentation
                 float height = duck ? 30.5f : 47.5f;
                 image.rectTransform.sizeDelta = new Vector2(duck ? 59 : 44, height);
                 image.rectTransform.anchoredPosition = new Vector2(50, -140 + height + (float)(dino == null ? 0 : dino.y));
-                Color color = versus && i == 1 || humanOnly ? new Color32(70, 140, 220, 255) : Color.white;
+                Color color = versus && i == 1 ? new Color32(70, 140, 220, 255) : Color.white;
                 if (runners > 2) color.a = 0.2f;
                 if (dino != null && !dino.alive) color.a = 0.35f;
                 image.color = color;
             }
+            int displayedScore = world == null ? 0 : world.Score;
+            if (world != null && world.AliveCount == 0)
+            {
+                displayedScore = 0;
+                foreach (var runner in world.Dinos) displayedScore = Math.Max(displayedScore, runner.score);
+            }
             int best = PlayerPrefs.GetInt("DinoHighScore", 0);
-            score.text = "HI " + best.ToString("D5") + "   " + (world == null ? "00000" : world.Score.ToString("D5"));
-            overlay.text = gameOver ? "G A M E  O V E R" : ready ? "ПРОБЕЛ / КАСАНИЕ — СТАРТ" : world == null ? "CHROME DINO" : "";
-            legend.text = versus ? "Серый — бот   Синий — человек" : humanOnly ? "Игрок" : world != null && runners > 2 ? "Популяция: " + world.AliveCount : "";
+            score.text = "HI " + best.ToString("D5") + "   " + displayedScore.ToString("D5");
+            overlay.text = gameOver ? "G A M E  O V E R" : ready ? "SPACE / TAP TO START" : world == null ? "CHROME DINO" : "";
+            legend.text = versus ? "Gray: bot   Blue: human" : world != null && runners > 2 ? "Population: " + world.AliveCount : "";
         }
     }
 }

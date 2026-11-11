@@ -52,6 +52,18 @@ namespace ChromeDino.Tests
         }
 
         [Test]
+        public void ValidJsonWithInvalidSchemaAlsoFallsBackToCheckpointBackup()
+        {
+            var repository = new JsonTrainingRepository(directory);
+            var session = Create();
+            session.Tick(); repository.Save(session);
+            string expected = JsonUtility.ToJson(session.Capture());
+            session.Tick(); repository.Save(session);
+            File.WriteAllText(Path.Combine(directory, session.RunId, "checkpoint.json"), "{}");
+            Assert.AreEqual(expected, JsonUtility.ToJson(repository.LoadLatest().Capture()));
+        }
+
+        [Test]
         public void ChampionArchiveKeepsSeparateRunsAndSkipsBadRecords()
         {
             var repository = new JsonTrainingRepository(directory);
@@ -109,6 +121,57 @@ namespace ChromeDino.Tests
             Assert.AreEqual(1, repository.LoadLatest().World.AliveCount);
             Assert.AreEqual(1, repository.LoadLatest().Generation);
             Assert.AreEqual(0, broken);
+        }
+
+        [Test]
+        public void MissingAndCorruptLatestPointerRecoverFromItsBackup()
+        {
+            var repository = new JsonTrainingRepository(directory);
+            var session = Create();
+            session.Tick(); repository.Save(session);
+            session.Tick(); repository.Save(session);
+            string expected = JsonUtility.ToJson(session.Capture());
+            string latest = Path.Combine(directory, "latest.txt");
+            File.WriteAllText(latest, "../invalid-run");
+            Assert.AreEqual(expected, JsonUtility.ToJson(repository.LoadLatest().Capture()));
+            File.Delete(latest);
+            Assert.AreEqual(expected, JsonUtility.ToJson(repository.LoadLatest().Capture()));
+        }
+
+        [Test]
+        public void ChampionBackupRecoversCorruptAndMissingPrimaryWithoutDuplicates()
+        {
+            var repository = new JsonTrainingRepository(directory);
+            var session = Create();
+            GenerationChampion champion = null;
+            for (int i = 0; i < 5000 && champion == null; i++) champion = session.Tick();
+            Assert.IsNotNull(champion);
+            repository.Save(session, champion);
+            repository.Save(session, champion);
+            string path = Path.Combine(directory, session.RunId, "generation-" + champion.generation.ToString("D8") + ".json");
+            File.WriteAllText(path, "invalid");
+            var archive = repository.ListChampions(out int broken);
+            Assert.AreEqual(1, archive.Count);
+            Assert.AreEqual(0, broken);
+            Assert.AreEqual(JsonUtility.ToJson(champion), JsonUtility.ToJson(archive[0]));
+            File.Delete(path);
+            Assert.AreEqual(1, repository.ListChampions(out broken).Count);
+            Assert.AreEqual(0, broken);
+        }
+
+        [Test]
+        public void ArchiveRejectsAGenerationStoredUnderTheWrongFileName()
+        {
+            var repository = new JsonTrainingRepository(directory);
+            var session = Create();
+            GenerationChampion champion = null;
+            for (int i = 0; i < 5000 && champion == null; i++) champion = session.Tick();
+            Assert.IsNotNull(champion);
+            repository.Save(session, champion);
+            string path = Path.Combine(directory, session.RunId, "generation-" + champion.generation.ToString("D8") + ".json");
+            File.Move(path, Path.Combine(directory, session.RunId, "generation-99999999.json"));
+            Assert.AreEqual(0, repository.ListChampions(out int broken).Count);
+            Assert.AreEqual(1, broken);
         }
 
         [Test]

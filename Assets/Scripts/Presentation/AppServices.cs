@@ -10,7 +10,6 @@ namespace ChromeDino.Presentation
     public static class AppServices
     {
         private static ITrainingRepository repository;
-        public static bool HumanGame { get; private set; }
         public static TrainingSession Training { get; set; }
         public static ITrainingRepository Repository
         {
@@ -19,7 +18,7 @@ namespace ChromeDino.Presentation
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset() { repository = null; Training = null; HumanGame = false; }
+        private static void Reset() { repository = null; Training = null; }
 
         public static void StartNewTraining()
         {
@@ -37,7 +36,6 @@ namespace ChromeDino.Presentation
         }
 
         public static void MainMenu() { Training = null; SceneManager.LoadScene("MainMenu"); }
-        public static void OpenHumanGame() { HumanGame = true; Training = null; SceneManager.LoadScene("AITest"); }
-        public static void OpenTest() { HumanGame = false; Training = null; SceneManager.LoadScene("AITest"); }
+        public static void OpenTest() { Training = null; SceneManager.LoadScene("AITest"); }
     }
 }

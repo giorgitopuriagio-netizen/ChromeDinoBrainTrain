@@ -104,12 +104,12 @@ namespace ChromeDino.Persistence
                 dino.deathClearance = number(dino.deathClearance);
             }
             snapshot.world.distance = number(snapshot.world.distance);
-            foreach (var pipe in snapshot.world.obstacles)
+            foreach (var obstacle in snapshot.world.obstacles)
             {
-                if (pipe == null) throw new InvalidDataException("Missing obstacle.");
-                pipe.x = number(pipe.x);
-                pipe.bottom = number(pipe.bottom);
-                pipe.speedOffset = number(pipe.speedOffset);
+                if (obstacle == null) throw new InvalidDataException("Missing obstacle.");
+                obstacle.x = number(obstacle.x);
+                obstacle.bottom = number(obstacle.bottom);
+                obstacle.speedOffset = number(obstacle.speedOffset);
             }
         }
     }

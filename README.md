@@ -1,144 +1,96 @@
-# Chrome Dino Brain Train
+# ChromeDinoBrainTrain
 
 [Русская версия](README_RU.md)
 
-A Unity endless runner with an evolutionary neural network training system. You can play the game yourself, train a population of AI runners, replay saved champions, and compete against a bot on the same course.
+A Unity **6000.3.8f1** endless runner with a neural network and a genetic algorithm. Train a population of Dino agents, evaluate a saved generation, and compete against its champion on the same course.
 
-This guide describes the current implementation and provides a practical review sequence. The interface currently uses Russian labels; their English meanings are listed below.
+The menu and scene-selection workflow match [FlappyBirdBrainTrain](https://github.com/Foxter931/FlappyBirdBrainTrain): **New training**, **Continue training**, and **AI evaluation / Human vs bot**. Evaluation has one combined generation-brain list and mode buttons that start or restart a round immediately. The runner retains its own jump, duck, obstacle, and scoring rules.
 
-## 1. Open and run the project
+## Getting started
 
-- Editor version: **Unity 6000.3.8f1**.
-- Open the project folder in Unity Hub and allow Unity to import its packages and assets.
-- Open [Assets/Scenes/MainMenu.unity](Assets/Scenes/MainMenu.unity), then press **Play**.
-- Alternatively, use **Chrome Dino > Open Main Menu** in the editor menu.
-- A local Windows build, if present, is available at `Builds/Windows/ChromeDino.exe` in the project root.
+1. Open this project in Unity Hub with **Unity 6000.3.8f1** and let Unity import its dependencies.
+2. Open [MainMenu.unity](Assets/Scenes/MainMenu.unity), then press **Play**. Alternatively, select **Chrome Dino > Open Main Menu**.
+3. Start training or continue a saved session. On a clean checkout, run **New training** before evaluating a brain.
 
-The three main scenes are `MainMenu`, `Training`, and `AITest`. They are already included in Build Settings. The retained `SampleScene` also opens the new main menu.
+Scenes: **MainMenu**, **Training**, and **AITest**. MainMenu is first in Build Settings. The interface is in English.
 
-## 2. Find the main actions
+For a Windows build, use **Chrome Dino > Build Windows**. Output: `Builds/Windows/ChromeDino.exe`. Share the entire build directory, including the executable's data and runtime files. Windows build support must be installed for this Unity editor.
 
-| English action | Current interface label |
+## Reviewer walkthrough
+
+1. Click **New training** to create a separate run with **200 agents**. Earlier runs remain available in the archive.
+2. Select **x10** or **x30** to accelerate training. Observe the generation, alive count, score, and best score. Acceleration performs more fixed simulation steps without changing physics; achieved speed depends on the machine.
+3. Wait for a generation to end or for just one runner to remain. Its brain becomes available for evaluation. Training has no automatic overall generation limit or survivor timeout.
+4. Click **Stop and save**. The simulation stops and writes a complete checkpoint. Click **Evaluate AI** to open the saved-brain screen.
+5. Choose **Generation brain**. This single list contains champions from all runs. When generation numbers repeat, a run number distinguishes them; run 1 is the newest archived run.
+6. Choose **Course: new** to evaluate generalization, or **Course: selected generation** to replay the selected champion's recorded course.
+7. Click **Watch bot** to start a one-runner round immediately. There is no separate Start button.
+8. Click **Human vs bot** to create a fresh two-runner competition. Both participants wait for the first human jump. Gray is the bot; blue is the human.
+9. Press **Space**, **Up Arrow**, **W**, the **Jump / Space** button, or the field to start and jump. Hold for a higher jump. Use **Down Arrow**, **S**, or **Duck / Down** to duck on the ground or descend faster in the air.
+10. Switch between the mode buttons or click the current mode again. Each click creates a fresh round and clears old input. Generation and course selectors unlock after **Stop round** or natural completion.
+11. Return to **Main menu**, then select **Continue training**. The saved generation, population, world, and random states resume rather than creating a new population.
+
+Switching windows pauses training and saves it; click **Resume** after returning. Competition also pauses on focus loss and waits for a new human jump to resume. Bot-only evaluation resumes automatically when focus returns. **Esc** stops the current round or training session.
+
+Early agents can crash quickly. Since generations face different courses, performance need not improve in every generation.
+
+## Game rules
+
+- The first three seconds are clear of newly spawned obstacles. Speed increases from 6 to 13 pixels per simulation tick.
+- Small and large cacti appear in groups. Birds appear at higher speeds and fly at three elevations.
+- Jump height depends on holding or releasing jump. A new jump requires landing and a new press; holding the key does not cause automatic hopping.
+- Both competitors use the same physics and obstacles. They do not collide with one another.
+- If one participant dies, the other keeps running. Longer survival wins; death on the same tick is a draw. Manual interruption does not declare a winner.
+- Score is based on distance. The human high score is stored in PlayerPrefs. Day/night lighting alternates as distance increases.
+
+## Architecture and learning
+
+| Source | Responsibility |
 | --- | --- |
-| Play yourself | Играть самому |
-| New training | Новое обучение |
-| Continue training | Продолжить обучение |
-| AI evaluation / human versus bot | Проверка ИИ / человек против бота |
-| Pause / Resume | Пауза / Продолжить |
-| Stop and save | Остановить и сохранить |
-| Evaluate AI | Проверить ИИ |
-| Watch the bot | Смотреть бота |
-| Human versus bot | Человек против бота |
-| Start / Retry | Начать / повторить |
-| Stop the run | Остановить заезд |
-| Main menu | В меню |
+| [DinoWorld.cs](Assets/Scripts/Core/DinoWorld.cs) | Deterministic 1/60-second simulation, controls, obstacles, sensors, scoring, and collision boxes. |
+| [NeuralNetwork.cs](Assets/Scripts/Core/NeuralNetwork.cs) | Genome validation, weights and biases, and feed-forward evaluation. |
+| [GeneticAlgorithm.cs](Assets/Scripts/Core/GeneticAlgorithm.cs) | Fitness, tournament selection, crossover, mutation, and elitism. |
+| [TrainingSession.cs](Assets/Scripts/Core/TrainingSession.cs) | Population lifecycle, champions, and complete training snapshots. |
+| [EvaluationSession.cs](Assets/Scripts/Core/EvaluationSession.cs) | Immutable round mode, matching runner/action arrays, and pause/input state. |
+| [TrainingRepository.cs](Assets/Scripts/Persistence/TrainingRepository.cs) | Atomic saves, checkpoints, champion archive, and backup recovery. |
+| [TrainingJson.cs](Assets/Scripts/Persistence/TrainingJson.cs) | JSON with an exact binary representation of double values. |
+| [Presentation](Assets/Scripts/Presentation) | Scene navigation, UI, rendering, held input, and application events. |
 
-The training statistics show **Generation** (Поколение), **Alive** (Живы), **Score** (Очки), and **Best score** (Рекорд).
+The core assembly has no Unity engine references. Training, bot evaluation, and human competition use the same simulation. Scene interfaces are created in code at runtime, so the scene hierarchy is intentionally small before Play Mode.
 
-## 3. Suggested review sequence
+The network topology is **10 -> 16 -> 10 -> 2**, with `tanh` hidden layers, `sigmoid` outputs, and evolvable biases. Inputs describe the nearest obstacle's distance, width, height, and elevation; running speed; runner height and vertical velocity; grounded state; the following gap; and ducking state. Outputs control jump and duck.
 
-### A. Play the game without training
+The genetic algorithm retains four unchanged elites, selects parents through tournaments, crosses every weight and bias, applies additive Gaussian mutations, and introduces 5% random immigrants. Genomes do not share mutable arrays. Fitness prioritizes survival ticks, then score, passed obstacles, and a stable index for exact ties. All agents within one generation face the same course; later generations get different courses.
 
-1. Select **Play yourself**, then **Start / Retry**.
-2. Press **Space**, **Up Arrow**, or **W** to start and jump. Clicking or touching the playing field also works.
-3. Hold the jump input for a higher jump. Release it and press again after landing to jump again.
-4. Hold **Down Arrow** or **S** to duck on the ground or descend faster in the air. The on-screen duck button also supports holding.
-5. Avoid the cacti and birds. Running speed increases over time, and score is based on distance.
-6. After a collision, use **Start / Retry** for another attempt. **Esc** or **Stop the run** interrupts the attempt.
+## Persistence
 
-Expected behavior: the game waits for your first jump before starting. No trained network or saved checkpoint is required. The first three seconds of simulation are clear of newly spawned obstacles. Your runner is blue; the personal high score is stored in PlayerPrefs.
+Saves live outside the repository at `Application.persistentDataPath/Training/`:
 
-### B. Start and inspect training
+- `<runId>/checkpoint.json`: complete training state; `.bak` contains the previous checkpoint.
+- `<runId>/generation-00000001.json` and subsequent files: generation champions; records can also have backup copies.
+- `latest.txt`: the run used for continuation; its backup is tried if this pointer is missing or invalid.
 
-1. Return to the main menu and select **New training**.
-2. Observe a population of **200 runners** on one shared course.
-3. Try the **x1, x5, x10, and x30** speed buttons. These request more fixed simulation steps; the physics step stays the same. Achieved training speed depends on the machine.
-4. Watch the alive count decrease. When everyone dies, the best runner is archived and the next generation starts.
-5. Wait for a completed generation, or for just one runner to remain alive, then select **Stop and save**.
-6. Select **Evaluate AI** to inspect an archived brain.
+Autosaves occur every 30 seconds, after generations, on pause/focus loss, and on exit. Write failures pause training and prevent navigation away from unsaved state. Damaged primary checkpoints and champion records can recover from their backups. Invalid archive entries are skipped.
 
-Expected behavior: training has no automatic generation or survivor time limit. A last living runner is saved for evaluation without ending its generation. New training creates a separate run and retains previous runs in the archive.
+Exact numeric payloads preserve double values through Unity JSON parsing, so continuation can reproduce future decisions and generation transitions. A completed champion replays its recorded result on the same course. **Last survivor** entries belong to unfinished generations and can keep improving while training continues.
 
-**When switching to another window, training pauses and saves. Select Resume after returning.** A stopped session is continued through the main menu's **Continue training** action.
+## Tests
 
-### C. Verify saving and continuation
+Run **Edit Mode** and **Play Mode** in Unity Test Runner. Checks cover checkpoint continuation, backups, archive integrity, menu navigation, combined generation selection, immediate mode launch, repeated mode switching, held controls, pause/resume, and stopping/restarting.
 
-1. During training, note the generation, alive count, score, and runner positions.
-2. Select **Stop and save**, then **Main menu**.
-3. Select **Continue training**.
-4. Confirm that the saved generation and world continue rather than starting a fresh population.
-
-The checkpoint includes all genomes, the current world, runner control states, and both random generator states. Automated tests check exact continuation over subsequent decisions and generations; the visible counters can advance immediately after resuming.
-
-### D. Evaluate a champion and compete against it
-
-1. Open **AI evaluation / human versus bot**.
-2. Choose a training run in the first dropdown and a generation in the second dropdown.
-3. Select **Watch the bot**, then **Start / Retry**.
-4. Stop the run and switch **Трасса: новая** (New course) to **Трасса: из выбранного поколения** (Selected generation's course) to replay the recorded course.
-5. Select **Human versus bot**, then **Start / Retry**. Your first jump starts both participants together.
-
-Expected behavior: both runners use the same physics and obstacles and do not collide with each other. Gray is the bot and blue is the human. If one dies, the other continues. Survival time determines the result; death on the same simulation tick is a draw. Manual interruption does not declare a winner.
-
-A completed champion should reproduce its original score and survival time on its recorded course. An entry marked **последний живой** is a snapshot of a living survivor from an unfinished generation. With an empty archive, train first; ordinary human play remains available.
-
-## 4. How the AI learns
-
-The controller is a feed-forward network with topology **10 -> 16 -> 10 -> 2**. Hidden layers use `tanh`, output neurons use `sigmoid`, and every neuron has an evolvable bias.
-
-Its ten inputs describe the nearest obstacle's distance, width, height, and elevation; running speed; the runner's height and vertical velocity; whether it is grounded; the gap to the following obstacle; and its ducking state. The two outputs control jumping and ducking.
-
-Training uses a **genetic algorithm**. It evaluates survival, ranks runners, selects parents through tournaments, crosses their weights and biases, and applies additive Gaussian mutations. Four elite genomes are retained unchanged, and 5% of the population consists of new random genomes. Parent and child arrays are independent.
-
-All individuals in a generation face the same course. Subsequent generations receive different courses. Ranking prioritizes survival ticks, followed by score, passed obstacles, and a stable index when all other values tie. Scores can fluctuate between generations because their courses differ.
-
-## 5. Code to inspect
-
-| Location from the project root | Responsibility |
-| --- | --- |
-| [Assets/Scripts/Core/DinoWorld.cs](Assets/Scripts/Core/DinoWorld.cs) | Deterministic 1/60-second simulation, movement, obstacles, collisions, and sensors. |
-| [Assets/Scripts/Core/NeuralNetwork.cs](Assets/Scripts/Core/NeuralNetwork.cs) | Genome validation, initialization, biases, and network evaluation. |
-| [Assets/Scripts/Core/GeneticAlgorithm.cs](Assets/Scripts/Core/GeneticAlgorithm.cs) | Fitness ranking, selection, crossover, mutation, and elitism. |
-| [Assets/Scripts/Core/TrainingSession.cs](Assets/Scripts/Core/TrainingSession.cs) | Population lifecycle, champions, and complete training snapshots. |
-| [Assets/Scripts/Persistence/TrainingRepository.cs](Assets/Scripts/Persistence/TrainingRepository.cs) | Checkpoints, archive access, atomic writes, and backup recovery. |
-| [Assets/Scripts/Persistence/TrainingJson.cs](Assets/Scripts/Persistence/TrainingJson.cs) | JSON plus exact binary double values for reproducible continuation. |
-| `Assets/Scripts/Presentation/` | Scene flow, UI, held input, rendering, and application lifecycle handling. |
-| `Assets/Tests/EditMode/` and `Assets/Tests/PlayMode/` | Persistence and interactive workflow checks. |
-
-The core assembly has no Unity engine references. Human play, training, and bot evaluation all use the same `DinoWorld`. Training acceleration does not change collision or movement rules. UI objects are created in code when a scene starts, so the scene hierarchy is intentionally small before entering Play Mode.
-
-## 6. Save files and failure handling
-
-Saves are stored under `Application.persistentDataPath/Training/`, outside the project Assets folder:
-
-- `<runId>/checkpoint.json`: full training state.
-- `<runId>/checkpoint.json.bak`: previous checkpoint.
-- `<runId>/generation-00000001.json` and later files: archived champions.
-- `latest.txt`: the run selected for continuation.
-
-Autosaves occur every 30 seconds, after generations, on pause or focus loss, and on application exit. A write failure pauses training and prevents navigation away from unsaved state. Loading falls back to the previous checkpoint if the current checkpoint is damaged. Invalid archive entries are skipped.
-
-## 7. Run the checks and build
-
-Open Unity's **Test Runner** and run both **Edit Mode** and **Play Mode** tests. The Play Mode checks cover menu navigation, training, saving, bot evaluation, competition, human play without a brain, held input, restart, and pause behavior. They use temporary save directories.
-
-For the independent core checks, run these commands from the **project root**:
+Independent core checks, from the project root:
 
 ```powershell
 dotnet run --project Tests/CoreChecks/CoreChecks.csproj --configuration Release
 dotnet run --project Tests/CoreChecks/CoreChecks.csproj --configuration Release -- --training-smoke
 ```
 
-These command-line checks require **.NET SDK 10**. The Unity game itself does not depend on that SDK. The second command trains three populations for up to 40 generations and also compares champions on ten unseen courses.
+These standalone commands require **.NET SDK 10**; the Unity game does not. The smoke command trains three populations for up to 40 generations, then evaluates champions on ten unseen courses. Recorded earlier trials improved best training scores from 58/58/72 to 878/1731/1644, and unseen-course means from 40.4/50.3/56.2 to 606.7/763.0/900.6. Results from a new run can differ.
 
-Recorded project validation: **15 core checks, 6 Edit Mode tests, and 2 Play Mode tests passed**. In the three 40-generation trials, initial champion scores of 58, 58, and 72 improved to best training scores of 878, 1731, and 1644. Mean scores on ten unseen courses improved from 40.4/50.3/56.2 to 606.7/763.0/900.6. These are recorded experimental results; new training runs can differ.
+Generated reports and UI previews are written to `TestResults/`; Unity logs are in `Logs/`. These generated files are excluded from version control. See [the audit](Docs/LOGIC_AUDIT.md) for the latest implementation notes.
 
-Local reports and UI previews, when generated, are in `TestResults/` at the project root. The Windows build has also passed a startup check.
+## Repository cleanup
 
-Use **Chrome Dino > Build Windows** to create `Builds/Windows/ChromeDino.exe`. Install the Windows build support module for the selected Unity editor if it is missing.
+The repository contains the active three scenes, scripts, tests, project settings, package declarations, and the sprite atlas in `Assets/Resources/DinoAtlas.png`. Old scripts/prefabs, the duplicate SampleScene, generated IDE projects, editor layouts, and cache/log files have been removed from the tracked project. Unity regenerates its local working files when needed. Unused 2D, navigation, timeline, visual scripting, multiplayer, and obsolete IDE packages have been removed.
 
-## 8. Scope and project history
-
-The runner recreates familiar Chrome Dino behavior in Unity. It includes variable jump height, ducking, faster descent, cactus groups, birds at three heights, acceleration, distance scoring, and alternating day/night lighting.
-
-The earlier implementation is retained in `Legacy~/Assets/` outside Unity's imported assets. The active game uses the original project's sprite atlas in `Assets/Resources/DinoAtlas.png`. See [README_RU.md](README_RU.md) and [Docs/LOGIC_AUDIT.md](Docs/LOGIC_AUDIT.md) for additional implementation and audit notes.
+Original versions remain in Git history. The runner recreates familiar Chrome Dino behavior in Unity; it does not claim bit-for-bit equivalence with the browser implementation.
